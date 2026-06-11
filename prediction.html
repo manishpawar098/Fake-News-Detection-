@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Favicons -->
+    <link href="/static/logo.png" rel="icon" type="image/png">
+
+    <!-- Tailwind Play CDN (v3) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                dark: '#0f172a', // Slate 900
+                deep: '#020617', // Slate 950
+                emerald: '#10b981', // Emerald 500
+                teal: '#06b6d4', // Teal 500
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <title>Verify News Authenticity - Fake News Detection</title>
+  </head>
+  <body class="bg-brand-deep text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-brand-emerald selection:text-brand-deep flex flex-col justify-between">
+    
+    <!-- Background glow elements -->
+    <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-brand-emerald/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-brand-teal/10 rounded-full blur-[150px] pointer-events-none"></div>
+
+    <!-- Header Navigation -->
+    <header class="border-b border-white/5 backdrop-blur-md sticky top-0 z-50 bg-brand-deep/80">
+      <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-3 group">
+          <img src="/static/logo.png" alt="Logo" class="w-10 h-10 rounded-xl shadow-lg border border-brand-emerald/20 transition-transform duration-300 group-hover:scale-105">
+          <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-brand-emerald to-brand-teal bg-clip-text text-transparent">Fake News Detection</span>
+        </a>
+        <nav class="flex items-center gap-8 text-sm font-medium text-slate-400">
+          <a href="/" class="hover:text-slate-200 transition-colors duration-200">Home</a>
+          <a href="/predict" class="text-brand-emerald transition-colors duration-200">Prediction</a>
+          <a href="/#features" class="hover:text-slate-200 transition-colors duration-200">Features</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 flex-grow flex items-center justify-center relative z-10">
+      <div class="w-full max-w-2xl">
+        <!-- Back Link -->
+        <a href="/" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-brand-emerald transition-colors duration-200 mb-6 group">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back to Home
+        </a>
+
+        <!-- Main Form Glass Card -->
+        <div class="relative group">
+          <!-- Backdrop Glow -->
+          <div class="absolute -inset-1 bg-gradient-to-r from-brand-emerald to-brand-teal rounded-3xl blur opacity-25 group-hover:opacity-30 transition duration-1000"></div>
+          
+          <div class="relative bg-brand-dark/45 border border-white/10 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl">
+            <div class="text-center max-w-lg mx-auto mb-8 space-y-2">
+              <h1 class="text-2xl md:text-3xl font-extrabold text-white">Headline Authenticity Verifier</h1>
+              <p class="text-sm text-slate-400">Enter a news headline below. Our NLP algorithm will evaluate grammatical and context features to verify its integrity.</p>
+            </div>
+
+            <!-- Verification Form -->
+            <form action="/predict" method="POST" class="space-y-6">
+              <div class="space-y-2">
+                <label for="news" class="text-sm font-semibold text-slate-300">News Headline / Statement</label>
+                <textarea 
+                  name="news" 
+                  id="news" 
+                  rows="4" 
+                  required
+                  placeholder="Paste the news headline or article excerpt here..." 
+                  class="w-full bg-brand-deep/60 border border-white/10 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-brand-emerald focus:ring-1 focus:ring-brand-emerald transition-all duration-200 resize-none leading-relaxed text-sm"
+                >{{ request.form.get('news', '') }}</textarea>
+              </div>
+
+              <button 
+                type="submit" 
+                class="w-full py-4 bg-gradient-to-r from-brand-emerald to-brand-teal text-brand-deep font-bold rounded-2xl shadow-lg shadow-brand-emerald/15 hover:shadow-brand-emerald/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-center"
+              >
+                Verify News
+              </button>
+            </form>
+
+            <!-- Result Box (Rendered conditionally via Jinja2) -->
+            {% if prediction_text %}
+              <div class="mt-8 pt-8 border-t border-white/5">
+                {% if 'Fake' in prediction_text %}
+                  <!-- Warning: Fake News detected -->
+                  <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 flex items-start gap-4">
+                    <div class="p-2.5 rounded-xl bg-red-500/20 text-red-400 shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="text-base font-bold text-red-400 leading-snug">Suspicious Language Patterns Detected</h4>
+                      <p class="text-sm text-slate-300 mt-1 leading-relaxed">{{ prediction_text }}</p>
+                    </div>
+                  </div>
+                {% elif 'Real' in prediction_text %}
+                  <!-- Success: Real News verified -->
+                  <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 flex items-start gap-4">
+                    <div class="p-2.5 rounded-xl bg-emerald-500/20 text-brand-emerald shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="text-base font-bold text-brand-emerald leading-snug">Verified Authentic</h4>
+                      <p class="text-sm text-slate-300 mt-1 leading-relaxed">{{ prediction_text }}</p>
+                    </div>
+                  </div>
+                {% else %}
+                  <!-- Fallback generic prediction -->
+                  <div class="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 flex items-start gap-4">
+                    <div class="p-2.5 rounded-xl bg-blue-500/20 text-blue-400 shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.085 1.085l-.02.041a3.003 3.003 0 00-2.25 2.25l-.021.041a.75.75 0 01-1.085-1.085l.02-.041a3.003 3.003 0 002.25-2.25zM12 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="text-base font-bold text-blue-400 leading-snug">Evaluation Result</h4>
+                      <p class="text-sm text-slate-300 mt-1 leading-relaxed">{{ prediction_text }}</p>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8 text-center text-slate-500 text-xs relative z-10">
+      <div class="container mx-auto px-6">
+        <p>&copy; 2026 Fake News Detector. Built with Machine Learning & NLP.</p>
+      </div>
+    </footer>
+  </body>
+</html>
